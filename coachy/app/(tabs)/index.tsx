@@ -1,8 +1,12 @@
+import Divider from '@/components/Divider';
 import { StyleSheet } from 'react-native';
 
 const HomeScreen = () => {
   return (
-    <></>
+    <>
+
+    <Divider label='or'/>
+    </>
   )
 }
 
