@@ -1,13 +1,43 @@
 import { useUser } from '@/context/UserContext';
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, BackHandler, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function AuthScreen() {
+const AuthScreen = () => {
     const { login, continueAsGuest } = useUser();
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // Back handler for the auth screen
+    useEffect(() => {
+        const backAction = () => {
+            Alert.alert(
+                "Exit App",
+                "Are you sure you want to exit the app?",
+                [
+                    {
+                        text: "Cancel",
+                        onPress: () => null,
+                        style: "cancel"
+                    },
+                    {
+                        text: "Exit",
+                        onPress: () => BackHandler.exitApp()
+                    }
+                ],
+                { cancelable: true }
+            );
+            return true; // Prevent default back behavior
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
 
     const handleLogin = async () => {
         if (!email.trim() || !validateEmail(email)) {
@@ -20,7 +50,7 @@ export default function AuthScreen() {
 
         try {
             await login(email);
-            // Navigation will be handled by the AuthWrapper in _layout.tsx
+            // Navigation will be handled by the AuthGuard
         } catch (err) {
             setError('Login failed. Please try again.');
             console.error(err);
@@ -34,7 +64,7 @@ export default function AuthScreen() {
 
         try {
             await continueAsGuest();
-            // Navigation will be handled by the AuthWrapper in _layout.tsx
+            // Navigation will be handled by the AuthGuard
         } catch (err) {
             setError('Failed to continue as guest. Please try again.');
             console.error(err);
@@ -92,7 +122,7 @@ export default function AuthScreen() {
             </View>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -150,3 +180,5 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     }
 });
+
+export default AuthScreen;

@@ -1,12 +1,13 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { User, UserContextType } from '@/types/User';
+import { User, UserContextType } from '../types/user';
 
 // Create the context with initial undefined value
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Storage key
+// Storage keys
 const USER_STORAGE_KEY = 'app_user_data';
+const GUEST_STORAGE_KEY = 'app_guest_mode';
 
 type UserProviderProps = {
     children: ReactNode;
@@ -14,16 +15,25 @@ type UserProviderProps = {
 
 export const UserProvider = ({ children }: UserProviderProps) => {
     const [user, setUser] = useState<User | null>(null);
+    const [isGuest, setIsGuest] = useState<boolean>(false);
+
+    // Derived state
+    const isAuthenticated = Boolean(user) || isGuest;
 
     // Load user data from storage on mount
     useEffect(() => {
         const loadUserFromStorage = async () => {
             try {
+                // Check for user data
                 const userDataString = await SecureStore.getItemAsync(USER_STORAGE_KEY);
                 if (userDataString) {
                     const userData = JSON.parse(userDataString);
                     setUser(userData);
                 }
+
+                // Check for guest status
+                const guestStatus = await SecureStore.getItemAsync(GUEST_STORAGE_KEY);
+                setIsGuest(guestStatus === 'true');
             } catch (error) {
                 console.error('Failed to load user data:', error);
             }
@@ -49,16 +59,29 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         saveUserToStorage();
     }, [user]);
 
+    // Save guest status to storage whenever it changes
+    useEffect(() => {
+        const saveGuestStatus = async () => {
+            try {
+                await SecureStore.setItemAsync(GUEST_STORAGE_KEY, String(isGuest));
+            } catch (error) {
+                console.error('Failed to save guest status:', error);
+            }
+        };
+
+        saveGuestStatus();
+    }, [isGuest]);
+
     const login = async (email: string) => {
         try {
             // In a real app, you'd call your API to handle authentication here
-            // This is just a simplified example
             const newUser: User = {
                 id: Date.now().toString(), // In a real app, this would come from your backend
                 email,
             };
 
             setUser(newUser);
+            setIsGuest(false); // Ensure guest mode is off when logging in
         } catch (error) {
             console.error('Login error:', error);
             throw error;
@@ -67,12 +90,9 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
     const continueAsGuest = async () => {
         try {
-            // Guest users simply have a null user value
-            // We don't need to create a User object since guests don't have an email
+            // Set guest mode to true and clear any user data
             setUser(null);
-
-            // Make sure we clear any existing user data in storage
-            await SecureStore.deleteItemAsync(USER_STORAGE_KEY);
+            setIsGuest(true);
         } catch (error) {
             console.error('Continue as guest error:', error);
             throw error;
@@ -81,9 +101,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
     const logout = async () => {
         try {
-            // Clear user data
+            // Clear all auth data
             setUser(null);
+            setIsGuest(false);
             await SecureStore.deleteItemAsync(USER_STORAGE_KEY);
+            await SecureStore.deleteItemAsync(GUEST_STORAGE_KEY);
         } catch (error) {
             console.error('Logout error:', error);
             throw error;
@@ -92,6 +114,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
     const value = {
         user,
+        isAuthenticated,
+        isGuest,
         login,
         continueAsGuest,
         logout,

@@ -1,48 +1,88 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect } from 'react';
+import { BackHandler, Alert } from 'react-native';
+import { useUser } from '@/context/UserContext';
 
 const TabLayout = () => {
+  const { logout } = useUser();
+
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert(
+        "Exit App",
+        "Do you want to logout and exit?",
+        [
+          {
+            text: "Cancel",
+            onPress: () => null,
+            style: "cancel"
+          },
+          {
+            text: "Logout",
+            onPress: async () => {
+              try {
+                await logout();
+                // AuthGuard will handle redirection to auth screen
+              } catch (error) {
+                console.error("Logout failed:", error);
+              }
+            }
+          }
+        ],
+        { cancelable: true }
+      );
+      return true; // Prevent default back behavior
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [logout]);
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: Platform.select({
-          default: {},
-        }),
-      }}>
+    <Tabs screenOptions={{ tabBarActiveTintColor: '#007AFF' }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: () => <MaterialIcons size={28} name="calendar-today" />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="rocket-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="workouts"
         options={{
           title: 'Workouts',
-          tabBarIcon: () => <MaterialIcons size={28} name="history" />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="pulse-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="exercises"
         options={{
           title: 'Exercises',
-          tabBarIcon: () => <MaterialIcons size={28} name="fitness-center" />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="barbell-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: 'Account',
-          tabBarIcon: () => <MaterialIcons size={28} name="account-circle" />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
   );
-}
+};
 
 export default TabLayout;

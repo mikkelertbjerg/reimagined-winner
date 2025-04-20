@@ -1,14 +1,14 @@
-import { useUser } from "@/context/UserContext";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useUser } from '@/context/UserContext';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AccountScreen = () => {
-    const { user, logout } = useUser();
+    const { user, isGuest, logout } = useUser();
 
     const handleLogout = async () => {
         try {
             await logout();
-            // Navigation will be handled by the AuthWrapper in _layout.tsx
+            // Navigation will be handled by the AuthGuard
         } catch (error) {
             console.error('Logout failed:', error);
         }
@@ -17,7 +17,7 @@ const AccountScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>Profile</Text>
+                <Text style={styles.title}>Account</Text>
 
                 {user ? (
                     <>
@@ -31,9 +31,13 @@ const AccountScreen = () => {
                             <Text style={styles.value}>{user.id}</Text>
                         </View>
                     </>
-                ) : (
+                ) : isGuest ? (
                     <View style={styles.infoContainer}>
                         <Text style={styles.guestText}>You are browsing as a guest</Text>
+                    </View>
+                ) : (
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.guestText}>Not authenticated</Text>
                     </View>
                 )}
 
@@ -41,14 +45,12 @@ const AccountScreen = () => {
                     style={styles.button}
                     onPress={handleLogout}
                 >
-                    <Text style={styles.buttonText}>
-                        {user ? 'Logout' : 'Sign In'}
-                    </Text>
+                    <Text style={styles.buttonText}>Logout</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
