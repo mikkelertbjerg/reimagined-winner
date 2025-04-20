@@ -1,46 +1,62 @@
-import { StyleSheet, ViewStyle, TextStyle, ViewProps, View, Text, StyleProp } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, StyleProp, ViewStyle, TextStyle, DimensionValue } from 'react-native';
 
-type Props = {
-  label?: string;
-  color?: string;
+interface DividerProps {
+  text?: string;
   thickness?: number;
-  inset?: number;
-  labelStyle?: StyleProp<TextStyle>;
+  color?: string;
+  textColor?: string;
+  orientation?: 'horizontal' | 'vertical';
   style?: StyleProp<ViewStyle>;
-} & ViewProps
+  textStyle?: StyleProp<TextStyle>;
+  spacing?: number;
+}
 
-const Divider = ({ label, color = '#000', thickness = StyleSheet.hairlineWidth, inset = 0, labelStyle, style, ...props }: Props) => {
+const Divider = ({
+  text,
+  thickness = 1,
+  color = '#e0e0e0',
+  textColor = '#757575',
+  orientation = 'horizontal',
+  style,
+  textStyle,
+  spacing = 16,
+}: DividerProps) => {
+  const dividerStyle = {
+    backgroundColor: color,
+    ...(orientation === 'horizontal'
+      ? { height: thickness, marginVertical: spacing }
+      : { width: thickness, marginHorizontal: spacing, height: '100%' as DimensionValue }),
+  };
+
+  if (!text) {
+    return <View style={[dividerStyle, style]} />;
+  }
+
   return (
-    <View
-      style={[
-        styles.row,
-        { marginVertical: inset, alignItems: 'center' },
-        style
-      ]}
-      {...props}
-    >
-      <View style={[styles.line, { backgroundColor: color, height: thickness }]} />
-      {label && (
-        <Text style={[styles.label, labelStyle]}>{label}</Text>
-      )}
-      <View style={[styles.line, { backgroundColor: color, height: thickness }]} />
+    <View style={[styles.container, style]}>
+      <View style={[dividerStyle, styles.line]} />
+      <Text style={[styles.text, { color: textColor }, textStyle]}>{text}</Text>
+      <View style={[dividerStyle, styles.line]} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row'
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
   },
   line: {
-    flex: 1
+    flex: 1,
+    marginVertical: 8,
   },
-  label: {
-    marginHorizontal: 8,
-    color: '#999',
-    fontWeight: '500',
-    fontSize: 13
-  }
+  text: {
+    fontSize: 14,
+    paddingHorizontal: 10,
+    textAlign: 'center',
+  },
 });
 
 export default Divider;

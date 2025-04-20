@@ -34,6 +34,13 @@ const TabLayout = () => {
           tabBarIcon: () => <MaterialIcons size={28} name="fitness-center" />
         }}
       />
+      <Tabs.Screen
+        name="account"
+        options={{
+          title: 'Account',
+          tabBarIcon: () => <MaterialIcons size={28} name="account-circle" />
+        }}
+      />
     </Tabs>
   );
 }
