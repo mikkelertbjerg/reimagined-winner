@@ -2,109 +2,123 @@ import React from 'react';
 import { View, Text, ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from '@/context/ThemeContext';
 
-// Define divider variant types
+// Define divider props types
 type DividerVariant = 'default' | 'muted' | 'strong';
 type DividerTextVariant = 'default' | 'muted';
 
-// Define the component namespace
-const Divider = {
-  Root: ({
-    children,
-    orientation = 'horizontal',
-    style
-  }: {
-    children?: React.ReactNode;
-    orientation?: 'horizontal' | 'vertical';
-    style?: ViewStyle;
-  }) => {
-    return (
-      <View
-        style={[
-          {
-            flexDirection: orientation === 'horizontal' ? 'row' : 'column',
-            alignItems: 'center',
-            width: orientation === 'horizontal' ? '100%' : 'auto',
-            height: orientation === 'vertical' ? '100%' : 'auto',
-          },
-          style,
-        ]}
-      >
-        {children}
-      </View>
-    );
-  },
+interface DividerProps {
+  text?: string;
+  orientation?: 'horizontal' | 'vertical';
+  thickness?: number;
+  variant?: DividerVariant;
+  textVariant?: DividerTextVariant;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+}
 
-  Separator: ({
-    thickness = 1,
-    variant = 'default',
-    style
-  }: {
-    thickness?: number;
-    variant?: DividerVariant;
-    style?: ViewStyle;
-  }) => {
-    const theme = useTheme();
+/**
+ * Divider component with optional text label
+ */
+const Divider = ({
+  text,
+  orientation = 'horizontal',
+  thickness = 1,
+  variant = 'default',
+  textVariant = 'default',
+  style,
+  textStyle,
+}: DividerProps) => {
+  const theme = useTheme();
 
-    // Get color based on variant
-    let color;
+  // Get color based on variant
+  const getBorderColor = () => {
     switch (variant) {
       case 'muted':
-        color = theme.colors.border.muted;
-        break;
+        return theme.colors.border.muted;
       case 'strong':
-        color = theme.colors.border.strong;
-        break;
+        return theme.colors.border.strong;
       default:
-        color = theme.colors.border.DEFAULT;
+        return theme.colors.border.DEFAULT;
     }
+  };
 
+  // Get text color based on variant
+  const getTextColor = () => {
+    return textVariant === 'muted'
+      ? theme.colors.text.muted
+      : theme.colors.text.DEFAULT;
+  };
+
+  // If there's no text, render a simple divider
+  if (!text) {
     return (
       <View
         style={[
-          { flex: 1 },
           {
-            backgroundColor: color,
-            height: thickness,
-            marginVertical: theme.spacing[4],
+            backgroundColor: getBorderColor(),
+            height: orientation === 'horizontal' ? thickness : '100%',
+            width: orientation === 'horizontal' ? '100%' : thickness,
+            marginVertical: orientation === 'horizontal' ? theme.spacing[4] : 0,
+            marginHorizontal: orientation === 'vertical' ? theme.spacing[4] : 0,
           },
           style,
         ]}
       />
     );
-  },
+  }
 
-  Text: ({
-    children,
-    variant = 'default',
-    style
-  }: {
-    children: React.ReactNode;
-    variant?: DividerTextVariant;
-    style?: TextStyle;
-  }) => {
-    const theme = useTheme();
+  // Render divider with text
+  return (
+    <View
+      style={[
+        {
+          flexDirection: orientation === 'horizontal' ? 'row' : 'column',
+          alignItems: 'center',
+          width: orientation === 'horizontal' ? '100%' : 'auto',
+          height: orientation === 'vertical' ? '100%' : 'auto',
+          marginVertical: orientation === 'horizontal' ? theme.spacing[4] : 0,
+          marginHorizontal: orientation === 'vertical' ? theme.spacing[4] : 0,
+        },
+        style,
+      ]}
+    >
+      {/* Left/Top line */}
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: getBorderColor(),
+          height: orientation === 'horizontal' ? thickness : 'auto',
+          width: orientation === 'vertical' ? thickness : 'auto',
+        }}
+      />
 
-    // Get text color based on variant
-    const color = variant === 'muted'
-      ? theme.colors.text.muted
-      : theme.colors.text.DEFAULT;
-
-    return (
+      {/* Text */}
       <Text
         style={[
           {
             fontSize: theme.fontSizes.sm,
-            paddingHorizontal: theme.spacing[2],
+            paddingHorizontal: orientation === 'horizontal' ? theme.spacing[2] : 0,
+            paddingVertical: orientation === 'vertical' ? theme.spacing[2] : 0,
             textAlign: 'center',
-            color,
+            color: getTextColor(),
           },
-          style,
+          textStyle,
         ]}
       >
-        {children}
+        {text}
       </Text>
-    );
-  },
+
+      {/* Right/Bottom line */}
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: getBorderColor(),
+          height: orientation === 'horizontal' ? thickness : 'auto',
+          width: orientation === 'vertical' ? thickness : 'auto',
+        }}
+      />
+    </View>
+  );
 };
 
 export default Divider;

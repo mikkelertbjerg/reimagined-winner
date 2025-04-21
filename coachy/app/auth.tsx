@@ -12,10 +12,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@/context/UserContext';
 import { useThemeContext } from '@/context/ThemeContext';
+
 import Button from '@/components/ui/Button';
 import Divider from '@/components/ui/Divider';
-import LinkText from '@/components/ui/LinkText';
 import InputField from '@/components/ui/InputField';
+import LinkText from '@/components/ui/LinkText';
 
 const AuthScreen = () => {
     const { login, continueAsGuest } = useUser();
@@ -78,11 +79,13 @@ const AuthScreen = () => {
         setIsLoading(true);
 
         try {
+            // Ensure this function works properly
             await continueAsGuest();
-            // Navigation will be handled by the AuthGuard
+            // Success will be handled by AuthGuard navigation
+            console.log('Continuing as guest...');
         } catch (err) {
             setError('Failed to continue as guest. Please try again.');
-            console.error(err);
+            console.error('Guest login error:', err);
         } finally {
             setIsLoading(false);
         }
@@ -124,16 +127,9 @@ const AuthScreen = () => {
 
                     {/* Form Section */}
                     <View style={[
-                        styles.formContainer,
-                        {
-                            backgroundColor: theme.colors.background.card,
-                            borderColor: theme.colors.border.DEFAULT,
-                            borderRadius: theme.radii.lg,
-                            padding: theme.spacing[4],
-                            marginTop: -theme.spacing[6]
-                        }
+                        styles.formContainer
                     ]}>
-                        {/* Email Input using our FormInput component */}
+                        {/* Email Input using our InputField component */}
                         <InputField
                             label="Email"
                             placeholder="Enter your email"
@@ -143,65 +139,34 @@ const AuthScreen = () => {
                             autoCapitalize="none"
                             autoCorrect={false}
                             error={error}
+                            size='lg'
                         />
 
-                        {/* Forgot Password - using LinkText */}
-                        <View style={styles.forgotPasswordContainer}>
-                            <LinkText
-                                onPress={() => {/* Handle forgot password */ }}
-                                variant="primary"
-                                bold
-                            >
-                                Forgot password?
-                            </LinkText>
-                        </View>
+                        <Button
+                            intent="primary"
+                            size="lg"
+                            fullWidth
+                            disabled={isLoading}
+                            loading={isLoading}
+                            onPress={handleLogin}
+                        >
+                            Login
+                        </Button>
 
-                        {/* Login Button */}
-                        <Button.Root onPress={handleLogin} disabled={isLoading}>
-                            <Button.Element
-                                intent="primary"
-                                size="lg"
-                                fullWidth
-                                disabled={isLoading}
-                            >
-                                <Button.Content>
-                                    {isLoading ? (
-                                        <Button.Spinner color={theme.colors.primary.foreground} />
-                                    ) : (
-                                        <Button.Text size="lg">Login</Button.Text>
-                                    )}
-                                </Button.Content>
-                            </Button.Element>
-                        </Button.Root>
-
-                        {/* Divider */}
                         <View style={{ marginVertical: theme.spacing[4] }}>
-                            <Divider.Root>
-                                <Divider.Separator variant="muted" />
-                                <Divider.Text variant="muted">OR</Divider.Text>
-                                <Divider.Separator variant="muted" />
-                            </Divider.Root>
+                            <Divider text="OR" variant="strong" />
                         </View>
 
-                        {/* Continue as Guest Button */}
-                        <Button.Root onPress={handleContinueAsGuest} disabled={isLoading}>
-                            <Button.Element
-                                intent="secondary"
-                                variant="outline"
-                                size="lg"
-                                fullWidth
-                                disabled={isLoading}
-                            >
-                                <Button.Content>
-                                    <Button.Text intent="secondary" variant="outline" size="lg">
-                                        Continue as Guest
-                                    </Button.Text>
-                                </Button.Content>
-                            </Button.Element>
-                        </Button.Root>
+                        <Button
+                            intent="secondary"
+                            variant="outline"
+                            size='lg'
+                            loading={isLoading}
+                        >
+                            Continue without an account
+                        </Button>
                     </View>
 
-                    {/* Register Link - using LinkText with custom rendering */}
                     <View style={styles.registerContainer}>
                         <Text style={[
                             styles.registerText,
@@ -233,6 +198,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         flexGrow: 1,
+        justifyContent: 'space-between',
     },
     header: {
         padding: 24,
@@ -256,14 +222,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 2,
-    },
-    forgotPasswordContainer: {
-        alignItems: 'flex-end',
         marginBottom: 16,
     },
     registerContainer: {
         marginTop: 24,
-        marginBottom: 16,
+        marginBottom: 24,
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'center',
