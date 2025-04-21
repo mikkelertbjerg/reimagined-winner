@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@/context/ThemeContext';
 import { UserProvider } from '@/context/UserContext';
 import AuthGuard from '@/guards/AuthGuard';
 import { Stack } from 'expo-router';
@@ -38,15 +39,17 @@ export default function RootLayout() {
   }
 
   return (
-    <UserProvider>
-      <AuthGuard>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="auth" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </AuthGuard>
-      <StatusBar style="auto" />
-    </UserProvider>
+    <ThemeProvider>
+      <UserProvider>
+        <AuthGuard>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="auth" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </AuthGuard>
+        <StatusBar style="auto" />
+      </UserProvider>
+    </ThemeProvider>
   );
 }

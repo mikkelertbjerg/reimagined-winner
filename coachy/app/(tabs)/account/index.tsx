@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useUser } from '@/context/UserContext';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +19,7 @@ const AccountScreen = () => {
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
                 <Text style={styles.title}>Account</Text>
+                <ThemeToggle />
 
                 {user ? (
                     <>

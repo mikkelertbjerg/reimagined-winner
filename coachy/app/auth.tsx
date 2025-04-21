@@ -1,10 +1,25 @@
-import { useUser } from '@/context/UserContext';
-import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, BackHandler, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    BackHandler,
+    Alert,
+    ScrollView,
+    KeyboardAvoidingView,
+    Platform
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useUser } from '@/context/UserContext';
+import { useThemeContext } from '@/context/ThemeContext';
+import Button from '@/components/ui/Button';
+import Divider from '@/components/ui/Divider';
+import LinkText from '@/components/ui/LinkText';
+import InputField from '@/components/ui/InputField';
 
 const AuthScreen = () => {
     const { login, continueAsGuest } = useUser();
+    const { theme } = useThemeContext();
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -79,47 +94,132 @@ const AuthScreen = () => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <Text style={styles.title}>Welcome</Text>
+        <SafeAreaView style={[
+            styles.container,
+            { backgroundColor: theme.colors.background.DEFAULT }
+        ]}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={styles.flex}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    {/* Header with Background */}
+                    <View style={[
+                        styles.header,
+                        { backgroundColor: theme.colors.primary.DEFAULT }
+                    ]}>
+                        <Text style={[
+                            styles.headerTitle,
+                            { color: theme.colors.primary.foreground }
+                        ]}>
+                            Welcome Back
+                        </Text>
+                        <Text style={[
+                            styles.headerSubtitle,
+                            { color: theme.colors.primary.foreground }
+                        ]}>
+                            Sign in to continue
+                        </Text>
+                    </View>
 
-                <Text style={styles.subtitle}>Sign in or continue as a guest</Text>
+                    {/* Form Section */}
+                    <View style={[
+                        styles.formContainer,
+                        {
+                            backgroundColor: theme.colors.background.card,
+                            borderColor: theme.colors.border.DEFAULT,
+                            borderRadius: theme.radii.lg,
+                            padding: theme.spacing[4],
+                            marginTop: -theme.spacing[6]
+                        }
+                    ]}>
+                        {/* Email Input using our FormInput component */}
+                        <InputField
+                            label="Email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            error={error}
+                        />
 
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Email</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter your email"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                    />
-                </View>
+                        {/* Forgot Password - using LinkText */}
+                        <View style={styles.forgotPasswordContainer}>
+                            <LinkText
+                                onPress={() => {/* Handle forgot password */ }}
+                                variant="primary"
+                                bold
+                            >
+                                Forgot password?
+                            </LinkText>
+                        </View>
 
-                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                        {/* Login Button */}
+                        <Button.Root onPress={handleLogin} disabled={isLoading}>
+                            <Button.Element
+                                intent="primary"
+                                size="lg"
+                                fullWidth
+                                disabled={isLoading}
+                            >
+                                <Button.Content>
+                                    {isLoading ? (
+                                        <Button.Spinner color={theme.colors.primary.foreground} />
+                                    ) : (
+                                        <Button.Text size="lg">Login</Button.Text>
+                                    )}
+                                </Button.Content>
+                            </Button.Element>
+                        </Button.Root>
 
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleLogin}
-                    disabled={isLoading}
-                >
-                    {isLoading ? (
-                        <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                        <Text style={styles.buttonText}>Login with Email</Text>
-                    )}
-                </TouchableOpacity>
+                        {/* Divider */}
+                        <View style={{ marginVertical: theme.spacing[4] }}>
+                            <Divider.Root>
+                                <Divider.Separator variant="muted" />
+                                <Divider.Text variant="muted">OR</Divider.Text>
+                                <Divider.Separator variant="muted" />
+                            </Divider.Root>
+                        </View>
 
-                <TouchableOpacity
-                    style={[styles.button, styles.guestButton]}
-                    onPress={handleContinueAsGuest}
-                    disabled={isLoading}
-                >
-                    <Text style={styles.buttonText}>Continue as Guest</Text>
-                </TouchableOpacity>
-            </View>
+                        {/* Continue as Guest Button */}
+                        <Button.Root onPress={handleContinueAsGuest} disabled={isLoading}>
+                            <Button.Element
+                                intent="secondary"
+                                variant="outline"
+                                size="lg"
+                                fullWidth
+                                disabled={isLoading}
+                            >
+                                <Button.Content>
+                                    <Button.Text intent="secondary" variant="outline" size="lg">
+                                        Continue as Guest
+                                    </Button.Text>
+                                </Button.Content>
+                            </Button.Element>
+                        </Button.Root>
+                    </View>
+
+                    {/* Register Link - using LinkText with custom rendering */}
+                    <View style={styles.registerContainer}>
+                        <Text style={[
+                            styles.registerText,
+                            { color: theme.colors.text.muted, fontSize: theme.fontSizes.sm }
+                        ]}>
+                            Don't have an account?{' '}
+                        </Text>
+                        <LinkText
+                            onPress={() => {/* Handle registration */ }}
+                            variant="primary"
+                            bold
+                            style={{ fontSize: theme.fontSizes.sm }}
+                        >
+                            Register here
+                        </LinkText>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };
@@ -127,57 +227,49 @@ const AuthScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
     },
-    content: {
+    flex: {
         flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+    },
+    header: {
         padding: 24,
+        paddingTop: 48,
+        paddingBottom: 64,
+        alignItems: 'center',
         justifyContent: 'center',
     },
-    title: {
-        fontSize: 32,
+    headerTitle: {
+        fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 8,
-        textAlign: 'center',
     },
-    subtitle: {
+    headerSubtitle: {
         fontSize: 16,
-        color: '#666',
-        marginBottom: 32,
-        textAlign: 'center',
+        opacity: 0.8,
     },
-    inputContainer: {
+    formContainer: {
+        marginHorizontal: 16,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    forgotPasswordContainer: {
+        alignItems: 'flex-end',
         marginBottom: 16,
     },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        marginBottom: 8,
-    },
-    input: {
-        backgroundColor: '#f5f5f5',
-        borderRadius: 8,
-        padding: 16,
-        fontSize: 16,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        borderRadius: 8,
-        padding: 16,
+    registerContainer: {
+        marginTop: 24,
+        marginBottom: 16,
         alignItems: 'center',
-        marginBottom: 16,
+        flexDirection: 'row',
+        justifyContent: 'center',
     },
-    guestButton: {
-        backgroundColor: '#6c757d',
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    errorText: {
-        color: '#ff3b30',
-        marginBottom: 16,
+    registerText: {
+        textAlign: 'center',
     }
 });
 
