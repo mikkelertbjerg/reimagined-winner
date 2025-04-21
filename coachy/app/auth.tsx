@@ -13,16 +13,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@/context/UserContext';
-import { useThemeContext } from '@/context/ThemeContext';
 
 import Button from '@/components/ui/Button';
 import Divider from '@/components/ui/Divider';
 import InputField from '@/components/ui/InputField';
 import LinkText from '@/components/ui/LinkText';
+import { useSettings } from '@/context/SettingsContext';
 
 const AuthScreen = () => {
     const { login, continueAsGuest } = useUser();
-    const { theme } = useThemeContext();
+    const { theme } = useSettings();
+
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -173,12 +174,12 @@ const AuthScreen = () => {
                             autoCapitalize="none"
                             autoCorrect={false}
                             error={error}
-                            size="lg"
+                            size="md"
                         />
 
                         <Button
                             intent="primary"
-                            size="lg"
+                            size="md"
                             fullWidth
                             disabled={isLoading}
                             loading={isLoading}
@@ -192,8 +193,9 @@ const AuthScreen = () => {
                         </View>
 
                         <Button
-                            intent="tertiary"
-                            size="lg"
+                            intent="primary"
+                            variant='outline'
+                            size="md"
                             fullWidth
                             loading={isLoading}
                             onPress={handleContinueAsGuest}
@@ -265,10 +267,6 @@ const styles = StyleSheet.create({
     },
     formContainer: {
         marginHorizontal: 16,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 2,
         marginBottom: 16,
         padding: 16,
         borderRadius: 8,

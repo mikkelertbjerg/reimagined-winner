@@ -9,7 +9,7 @@ import {
     TextStyle,
     View,
 } from 'react-native';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 
 // Define button variant types
 type ButtonVariant = 'default' | 'outline' | 'ghost';
@@ -46,9 +46,8 @@ const Button = ({
     rightIcon,
     children,
 }: ButtonProps) => {
-    const theme = useTheme();
+    const { theme } = useSettings();
 
-    // Get background color based on variant and intent
     const getBackgroundColor = () => {
         if (variant === 'ghost' || variant === 'outline') return 'transparent';
 

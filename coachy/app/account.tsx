@@ -1,16 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@/context/UserContext';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 import Button from '@/components/ui/Button';
 import Divider from '@/components/ui/Divider';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { Ionicons } from '@expo/vector-icons';
 
 const AccountScreen = () => {
     const { user, isGuest, logout } = useUser();
-    const theme = useTheme();
-    const insets = useSafeAreaInsets();
+    const { theme, isDark, toggleTheme } = useSettings();
 
     const handleLogout = async () => {
         try {
@@ -22,14 +21,7 @@ const AccountScreen = () => {
 
     return (
         <SafeAreaView
-            style={[
-                styles.container,
-                {
-                    backgroundColor: theme.colors.background.DEFAULT,
-                    // We don't need top inset since our header handles that
-                    paddingTop: 0
-                }
-            ]}
+            style={[styles.container, { backgroundColor: theme.colors.background.DEFAULT }]}
             edges={['bottom', 'left', 'right']}
         >
             <ScrollView style={styles.content}>
@@ -51,19 +43,6 @@ const AccountScreen = () => {
                                 Email: {user?.email}
                             </Text>
                         )}
-                    </View>
-                </View>
-
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.text.DEFAULT }]}>
-                        Appearance
-                    </Text>
-
-                    <View style={styles.themeRow}>
-                        <Text style={[styles.themeText, { color: theme.colors.text.DEFAULT }]}>
-                            Theme:
-                        </Text>
-                        <ThemeToggle />
                     </View>
                 </View>
 
@@ -113,8 +92,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
+    themeToggleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     themeText: {
         fontSize: 16,
+        fontWeight: '500',
     },
 });
 

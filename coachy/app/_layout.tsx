@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@/context/ThemeContext';
+import { SettingsProvider } from '@/context/SettingsContext';
 import { UserProvider } from '@/context/UserContext';
 import AuthGuard from '@/guards/AuthGuard';
 import { Stack } from 'expo-router';
@@ -42,7 +42,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
+      <SettingsProvider>
         <UserProvider>
           <AuthGuard>
             <Stack
@@ -76,6 +76,10 @@ export default function RootLayout() {
                 options={{ title: "Your Account" }}
               />
               <Stack.Screen
+                name="settings"
+                options={{ title: "Settings" }}
+              />
+              <Stack.Screen
                 name="+not-found"
                 options={{ title: "Oops!" }}
               />
@@ -83,7 +87,7 @@ export default function RootLayout() {
           </AuthGuard>
           <StatusBar style="auto" />
         </UserProvider>
-      </ThemeProvider>
+      </SettingsProvider>
     </SafeAreaProvider>
   );
 }

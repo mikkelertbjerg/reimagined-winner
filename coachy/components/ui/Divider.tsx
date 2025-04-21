@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ViewStyle, TextStyle } from 'react-native';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 
 // Define divider props types
 type DividerVariant = 'default' | 'muted' | 'strong';
@@ -28,7 +28,7 @@ const Divider = ({
   style,
   textStyle,
 }: DividerProps) => {
-  const theme = useTheme();
+  const { theme } = useSettings();
 
   // Get color based on variant
   const getBorderColor = () => {

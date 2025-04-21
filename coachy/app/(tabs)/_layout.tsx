@@ -3,10 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect } from 'react';
 import { BackHandler, Alert } from 'react-native';
 import { useUser } from '@/context/UserContext';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 
 const TabLayout = () => {
-  const theme = useTheme();
+  const { theme } = useSettings();
   const { logout } = useUser();
 
   useEffect(() => {

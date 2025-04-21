@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons'; // Make sure to install expo/vector-icons
+import { useSettings } from '@/context/SettingsContext';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface AppHeaderProps {
@@ -11,12 +11,16 @@ interface AppHeaderProps {
 }
 
 const AppHeader = ({ title, showBackButton = false }: AppHeaderProps) => {
-    const theme = useTheme();
+    const { theme } = useSettings();
     const router = useRouter();
     const insets = useSafeAreaInsets();
 
     const handleAccountPress = () => {
         router.push('/account');
+    };
+
+    const handleSettingsPress = () => {
+        router.push('/settings');
     };
 
     const handleBackPress = () => {
@@ -54,12 +58,21 @@ const AppHeader = ({ title, showBackButton = false }: AppHeaderProps) => {
                 )}
             </View>
 
-            <TouchableOpacity
-                onPress={handleAccountPress}
-                style={styles.accountButton}
-            >
-                <Ionicons name="person-circle-outline" size={28} color={theme.colors.primary.DEFAULT} />
-            </TouchableOpacity>
+            <View style={styles.rightContainer}>
+                <TouchableOpacity
+                    onPress={handleSettingsPress}
+                    style={styles.iconButton}
+                >
+                    <Ionicons name="settings-outline" size={24} color={theme.colors.primary.DEFAULT} />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={handleAccountPress}
+                    style={styles.accountButton}
+                >
+                    <Ionicons name="person-circle-outline" size={28} color={theme.colors.primary.DEFAULT} />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -84,6 +97,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontWeight: '600',
+    },
+    rightContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconButton: {
+        padding: 6,
+        marginRight: 8,
     },
     accountButton: {
         padding: 6,

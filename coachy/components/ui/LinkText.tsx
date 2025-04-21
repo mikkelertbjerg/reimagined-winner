@@ -8,7 +8,7 @@ import {
     ViewStyle,
     GestureResponderEvent
 } from 'react-native';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 
 type LinkVariant = 'default' | 'muted' | 'primary' | 'destructive';
 
@@ -33,7 +33,7 @@ const LinkText = ({
     containerStyle,
     disabled = false
 }: LinkTextProps) => {
-    const theme = useTheme();
+    const { theme } = useSettings();
 
     // Get text color based on variant
     const getTextColor = () => {

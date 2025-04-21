@@ -12,7 +12,7 @@ import {
     NativeSyntheticEvent,
     TextInputFocusEventData
 } from 'react-native';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 
 // Define input size type
 type InputSize = 'sm' | 'md' | 'lg';
@@ -50,7 +50,7 @@ const InputField = ({
     placeholder,
     ...textInputProps
 }: InputFieldProps) => {
-    const theme = useTheme();
+    const { theme } = useSettings();
     const [isFocused, setIsFocused] = useState(false);
     const inputRef = useRef<TextInput>(null);
     const hasContent = value !== undefined ? !!value : !!defaultValue;

@@ -1,0 +1,254 @@
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSettings } from '@/context/SettingsContext';
+import { Ionicons } from '@expo/vector-icons';
+
+type SettingItemProps = {
+    title: string;
+    icon: string;
+    value?: React.ReactNode;
+    onPress?: () => void;
+};
+
+const SettingItem = ({ title, icon, value, onPress }: SettingItemProps) => {
+    const { theme } = useSettings();
+
+    return (
+        <TouchableOpacity
+            style={[styles.settingItem, { borderBottomColor: theme.colors.border.DEFAULT }]}
+            onPress={onPress}
+            disabled={!onPress}
+        >
+            <View style={styles.settingItemLeft}>
+                <View style={styles.iconContainer}>
+                    <Ionicons name={icon as any} size={22} color={theme.colors.primary.DEFAULT} />
+                </View>
+                <Text style={[styles.settingItemTitle, { color: theme.colors.text.DEFAULT }]}>
+                    {title}
+                </Text>
+            </View>
+
+            <View style={styles.settingItemRight}>
+                {value}
+                {onPress && (
+                    <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color={theme.colors.text.muted}
+                        style={styles.chevron}
+                    />
+                )}
+            </View>
+        </TouchableOpacity>
+    );
+};
+
+const SettingsSection = ({ title, children }: { title: string, children: React.ReactNode }) => {
+    const { theme } = useSettings();
+
+    return (
+        <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text.muted }]}>
+                {title}
+            </Text>
+            <View style={[styles.sectionContent, {
+                backgroundColor: theme.colors.background.card,
+                borderColor: theme.colors.border.DEFAULT
+            }]}>
+                {children}
+            </View>
+        </View>
+    );
+};
+
+const SettingsScreen = () => {
+    const { theme, isDark, toggleTheme, isMetric, toggleMeasurementSystem } = useSettings();
+
+    return (
+        <SafeAreaView
+            style={[
+                styles.container,
+                {
+                    backgroundColor: theme.colors.background.DEFAULT,
+                    paddingTop: 0 // Header handles top padding
+                }
+            ]}
+            edges={['bottom', 'left', 'right']}
+        >
+            <ScrollView style={styles.content}>
+                <SettingsSection title="APPEARANCE">
+                    <SettingItem
+                        title="Theme"
+                        icon="contrast-outline"
+                        value={
+                            <View style={styles.themeToggleContainer}>
+                                <Text style={[
+                                    styles.themeToggleLabel,
+                                    {
+                                        color: !isDark ? theme.colors.primary.DEFAULT : theme.colors.text.muted,
+                                        fontWeight: !isDark ? '600' : 'normal'
+                                    }
+                                ]}>
+                                    Light
+                                </Text>
+                                <Switch
+                                    value={isDark}
+                                    onValueChange={toggleTheme}
+                                    trackColor={{
+                                        false: theme.colors.border.DEFAULT,
+                                        true: theme.colors.primary.DEFAULT
+                                    }}
+                                    thumbColor="#FFFFFF"
+                                    style={{ marginHorizontal: 8 }}
+                                />
+                                <Text style={[
+                                    styles.themeToggleLabel,
+                                    {
+                                        color: isDark ? theme.colors.primary.DEFAULT : theme.colors.text.muted,
+                                        fontWeight: isDark ? '600' : 'normal'
+                                    }
+                                ]}>
+                                    Dark
+                                </Text>
+                            </View>
+                        }
+                    />
+                </SettingsSection>
+
+                <SettingsSection title="PREFERENCES">
+                    <SettingItem
+                        title="Units"
+                        icon="speedometer-outline"
+                        value={
+                            <View style={styles.themeToggleContainer}>
+                                <Text style={[
+                                    styles.themeToggleLabel,
+                                    {
+                                        color: !isMetric ? theme.colors.primary.DEFAULT : theme.colors.text.muted,
+                                        fontWeight: !isMetric ? '600' : 'normal'
+                                    }
+                                ]}>
+                                    Imperial
+                                </Text>
+                                <Switch
+                                    value={isMetric}
+                                    onValueChange={toggleMeasurementSystem}
+                                    trackColor={{
+                                        false: theme.colors.border.DEFAULT,
+                                        true: theme.colors.primary.DEFAULT
+                                    }}
+                                    thumbColor="#FFFFFF"
+                                    style={{ marginHorizontal: 8 }}
+                                />
+                                <Text style={[
+                                    styles.themeToggleLabel,
+                                    {
+                                        color: isMetric ? theme.colors.primary.DEFAULT : theme.colors.text.muted,
+                                        fontWeight: isMetric ? '600' : 'normal'
+                                    }
+                                ]}>
+                                    Metric
+                                </Text>
+                            </View>
+                        }
+                    />
+                </SettingsSection>
+
+                <SettingsSection title="PRIVACY">
+                    <SettingItem
+                        title="Privacy Policy"
+                        icon="shield-outline"
+                        onPress={() => {/* Open privacy policy */ }}
+                    />
+
+                    <SettingItem
+                        title="Terms of Service"
+                        icon="document-text-outline"
+                        onPress={() => {/* Open terms of service */ }}
+                    />
+
+                    <SettingItem
+                        title="Data & Privacy"
+                        icon="lock-closed-outline"
+                        onPress={() => {/* Open data privacy settings */ }}
+                    />
+                </SettingsSection>
+
+                <SettingsSection title="ABOUT">
+                    <SettingItem
+                        title="App Version"
+                        icon="information-circle-outline"
+                        value={
+                            <Text style={{ color: theme.colors.text.muted }}>1.0.0</Text>
+                        }
+                    />
+                </SettingsSection>
+            </ScrollView>
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    content: {
+        paddingVertical: 16,
+        flex: 1,
+    },
+    section: {
+        marginBottom: 24,
+        paddingHorizontal: 16,
+    },
+    sectionTitle: {
+        fontSize: 13,
+        fontWeight: '600',
+        marginBottom: 8,
+        marginLeft: 4,
+    },
+    sectionContent: {
+        borderRadius: 10,
+        borderWidth: 1,
+        overflow: 'hidden',
+    },
+    settingItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        borderBottomWidth: 1,
+    },
+    settingItemLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconContainer: {
+        width: 34,
+        height: 34,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+    },
+    settingItemTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    settingItemRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    themeToggleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    themeToggleLabel: {
+        fontSize: 14,
+    },
+    chevron: {
+        marginLeft: 8,
+    }
+});
+
+export default SettingsScreen;
