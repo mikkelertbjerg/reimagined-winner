@@ -7,7 +7,9 @@ import {
     Alert,
     ScrollView,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    Keyboard,
+    TouchableWithoutFeedback
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@/context/UserContext';
@@ -24,6 +26,26 @@ const AuthScreen = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+    // Keyboard event listeners - platform-specific to prevent flickering
+    useEffect(() => {
+        // Use different event names based on platform
+        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+        const showSubscription = Keyboard.addListener(showEvent, () => {
+            setKeyboardVisible(true);
+        });
+        const hideSubscription = Keyboard.addListener(hideEvent, () => {
+            setKeyboardVisible(false);
+        });
+
+        return () => {
+            showSubscription.remove();
+            hideSubscription.remove();
+        };
+    }, []);
 
     // Back handler for the auth screen
     useEffect(() => {
@@ -79,10 +101,8 @@ const AuthScreen = () => {
         setIsLoading(true);
 
         try {
-            // Ensure this function works properly
             await continueAsGuest();
             // Success will be handled by AuthGuard navigation
-            console.log('Continuing as guest...');
         } catch (err) {
             setError('Failed to continue as guest. Please try again.');
             console.error('Guest login error:', err);
@@ -96,6 +116,10 @@ const AuthScreen = () => {
         return re.test(email);
     };
 
+    const dismissKeyboard = () => {
+        Keyboard.dismiss();
+    };
+
     return (
         <SafeAreaView style={[
             styles.container,
@@ -104,25 +128,35 @@ const AuthScreen = () => {
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.flex}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
-                    {/* Header with Background */}
+                <ScrollView
+                    contentContainerStyle={[
+                        styles.scrollContent
+                    ]}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    {/* Header with Background - Always shown but adjusted for keyboard */}
                     <View style={[
                         styles.header,
-                        { backgroundColor: theme.colors.primary.DEFAULT }
+                        { backgroundColor: theme.colors.primary.DEFAULT },
+                        keyboardVisible && styles.headerCompact
                     ]}>
                         <Text style={[
                             styles.headerTitle,
-                            { color: theme.colors.primary.foreground }
+                            { color: theme.colors.primary.foreground },
+                            keyboardVisible && styles.headerTitleCompact
                         ]}>
                             Welcome Back
                         </Text>
-                        <Text style={[
-                            styles.headerSubtitle,
-                            { color: theme.colors.primary.foreground }
-                        ]}>
-                            Sign in to continue
-                        </Text>
+                        {!keyboardVisible && (
+                            <Text style={[
+                                styles.headerSubtitle,
+                                { color: theme.colors.primary.foreground }
+                            ]}>
+                                Sign in to continue
+                            </Text>
+                        )}
                     </View>
 
                     {/* Form Section */}
@@ -139,7 +173,7 @@ const AuthScreen = () => {
                             autoCapitalize="none"
                             autoCorrect={false}
                             error={error}
-                            size='lg'
+                            size="lg"
                         />
 
                         <Button
@@ -158,16 +192,21 @@ const AuthScreen = () => {
                         </View>
 
                         <Button
-                            intent="secondary"
-                            variant="outline"
-                            size='lg'
+                            intent="tertiary"
+                            size="lg"
+                            fullWidth
                             loading={isLoading}
+                            onPress={handleContinueAsGuest}
                         >
                             Continue without an account
                         </Button>
                     </View>
 
-                    <View style={styles.registerContainer}>
+                    {/* Registration option with visibility control */}
+                    <View style={[
+                        styles.registerContainer,
+                        keyboardVisible && { opacity: 0, height: 0, margin: 0 }
+                    ]}>
                         <Text style={[
                             styles.registerText,
                             { color: theme.colors.text.muted, fontSize: theme.fontSizes.sm }
@@ -207,10 +246,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    headerCompact: {
+        paddingTop: 20,
+        paddingBottom: 20,
+    },
     headerTitle: {
         fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 8,
+    },
+    headerTitleCompact: {
+        fontSize: 22,
+        marginBottom: 0,
     },
     headerSubtitle: {
         fontSize: 16,
@@ -223,6 +270,8 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 2,
         marginBottom: 16,
+        padding: 16,
+        borderRadius: 8,
     },
     registerContainer: {
         marginTop: 24,

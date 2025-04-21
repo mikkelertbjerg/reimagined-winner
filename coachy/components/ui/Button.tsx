@@ -13,7 +13,7 @@ import { useTheme } from '@/context/ThemeContext';
 
 // Define button variant types
 type ButtonVariant = 'default' | 'outline' | 'ghost';
-type ButtonIntent = 'primary' | 'secondary' | 'destructive';
+type ButtonIntent = 'primary' | 'secondary' | 'tertiary' | 'destructive';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 // Button props
@@ -55,6 +55,8 @@ const Button = ({
         switch (intent) {
             case 'secondary':
                 return theme.colors.secondary.DEFAULT;
+            case 'tertiary':
+                return theme.colors.tertiary.DEFAULT;
             case 'destructive':
                 return theme.colors.destructive.DEFAULT;
             case 'primary':
@@ -68,6 +70,8 @@ const Button = ({
         switch (intent) {
             case 'secondary':
                 return theme.colors.secondary.DEFAULT;
+            case 'tertiary':
+                return theme.colors.tertiary.DEFAULT;
             case 'destructive':
                 return theme.colors.destructive.DEFAULT;
             case 'primary':
@@ -82,6 +86,8 @@ const Button = ({
             switch (intent) {
                 case 'secondary':
                     return theme.colors.secondary.foreground;
+                case 'tertiary':
+                    return theme.colors.tertiary.foreground;
                 case 'destructive':
                     return theme.colors.destructive.foreground;
                 case 'primary':
@@ -94,6 +100,8 @@ const Button = ({
         switch (intent) {
             case 'secondary':
                 return theme.colors.secondary.DEFAULT;
+            case 'tertiary':
+                return theme.colors.tertiary.DEFAULT;
             case 'destructive':
                 return theme.colors.destructive.DEFAULT;
             case 'primary':

@@ -25,6 +25,11 @@ export const dark: Theme = {
             foreground: '#ffffff',
             hover: '#303034',
         },
+        tertiary: {
+            DEFAULT: '#0d9488', // Teal
+            foreground: '#ffffff',
+            hover: '#0f766e',
+        },
         destructive: {
             DEFAULT: '#ef4444',
             foreground: '#ffffff',

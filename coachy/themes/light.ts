@@ -25,6 +25,11 @@ export const light: Theme = {
             foreground: '#ffffff',
             hover: '#475569',
         },
+        tertiary: {
+            DEFAULT: '#0ea5e9', // Lighter teal/cyan for light mode
+            foreground: '#ffffff',
+            hover: '#0284c7',
+        },
         destructive: {
             DEFAULT: '#d32f2f',
             foreground: '#ffffff',

@@ -3,8 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect } from 'react';
 import { BackHandler, Alert } from 'react-native';
 import { useUser } from '@/context/UserContext';
+import { useTheme } from '@/context/ThemeContext';
 
 const TabLayout = () => {
+  const theme = useTheme();
   const { logout } = useUser();
 
   useEffect(() => {
@@ -44,7 +46,17 @@ const TabLayout = () => {
   }, [logout]);
 
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: '#007AFF' }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: theme.colors.primary.DEFAULT,
+        tabBarInactiveTintColor: theme.colors.text.muted,
+        tabBarStyle: {
+          backgroundColor: theme.colors.background.card,
+          borderTopColor: theme.colors.border.DEFAULT,
+        },
+        headerShown: false, // We're using our custom header from the root layout
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -69,15 +81,6 @@ const TabLayout = () => {
           title: 'Exercises',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="barbell-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="account"
-        options={{
-          title: 'Account',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />

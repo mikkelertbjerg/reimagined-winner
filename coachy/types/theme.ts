@@ -23,6 +23,11 @@ export type Theme = {
             foreground: string;
             hover?: string;
         };
+        tertiary: {
+            DEFAULT: string;
+            foreground: string;
+            hover?: string;
+        };
         destructive: {
             DEFAULT: string;
             foreground: string;
