@@ -61,6 +61,12 @@ export default function RootLayout() {
                     />
                   );
                 },
+                // Configure the header shadow - matches design system better
+                headerShadowVisible: false,
+                // Add consistent background color
+                headerStyle: {
+                  backgroundColor: '#FFFFFF',
+                },
               }}
             >
               <Stack.Screen
@@ -70,14 +76,6 @@ export default function RootLayout() {
               <Stack.Screen
                 name="auth"
                 options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="account"
-                options={{ title: "Your Account" }}
-              />
-              <Stack.Screen
-                name="settings"
-                options={{ title: "Settings" }}
               />
               <Stack.Screen
                 name="+not-found"

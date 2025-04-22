@@ -1,15 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@/context/UserContext';
 import { useSettings } from '@/context/SettingsContext';
 import Button from '@/components/ui/Button';
 import Divider from '@/components/ui/Divider';
-import { Ionicons } from '@expo/vector-icons';
 
 const AccountScreen = () => {
     const { user, isGuest, logout } = useUser();
-    const { theme, isDark, toggleTheme } = useSettings();
+    const { theme } = useSettings();
 
     const handleLogout = async () => {
         try {
@@ -86,19 +85,6 @@ const styles = StyleSheet.create({
     },
     guestText: {
         fontStyle: 'italic',
-    },
-    themeRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    themeToggleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    themeText: {
-        fontSize: 16,
-        fontWeight: '500',
     },
 });
 

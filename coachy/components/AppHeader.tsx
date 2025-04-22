@@ -16,11 +16,11 @@ const AppHeader = ({ title, showBackButton = false }: AppHeaderProps) => {
     const insets = useSafeAreaInsets();
 
     const handleAccountPress = () => {
-        router.push('/account');
+        router.push('/account' as any);
     };
 
     const handleSettingsPress = () => {
-        router.push('/settings');
+        router.push('/settings' as any);
     };
 
     const handleBackPress = () => {

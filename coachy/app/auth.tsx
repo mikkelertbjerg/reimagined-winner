@@ -3,13 +3,10 @@ import {
     View,
     Text,
     StyleSheet,
-    BackHandler,
-    Alert,
     ScrollView,
     KeyboardAvoidingView,
     Platform,
     Keyboard,
-    TouchableWithoutFeedback
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@/context/UserContext';
@@ -18,6 +15,7 @@ import Button from '@/components/ui/Button';
 import Divider from '@/components/ui/Divider';
 import InputField from '@/components/ui/InputField';
 import LinkText from '@/components/ui/LinkText';
+import ExitConfirmation from '@/components/ExitConfirmation';
 import { useSettings } from '@/context/SettingsContext';
 
 const AuthScreen = () => {
@@ -46,36 +44,6 @@ const AuthScreen = () => {
             showSubscription.remove();
             hideSubscription.remove();
         };
-    }, []);
-
-    // Back handler for the auth screen
-    useEffect(() => {
-        const backAction = () => {
-            Alert.alert(
-                "Exit App",
-                "Are you sure you want to exit the app?",
-                [
-                    {
-                        text: "Cancel",
-                        onPress: () => null,
-                        style: "cancel"
-                    },
-                    {
-                        text: "Exit",
-                        onPress: () => BackHandler.exitApp()
-                    }
-                ],
-                { cancelable: true }
-            );
-            return true; // Prevent default back behavior
-        };
-
-        const backHandler = BackHandler.addEventListener(
-            "hardwareBackPress",
-            backAction
-        );
-
-        return () => backHandler.remove();
     }, []);
 
     const handleLogin = async () => {
@@ -117,15 +85,14 @@ const AuthScreen = () => {
         return re.test(email);
     };
 
-    const dismissKeyboard = () => {
-        Keyboard.dismiss();
-    };
-
     return (
         <SafeAreaView style={[
             styles.container,
             { backgroundColor: theme.colors.background.DEFAULT }
         ]}>
+            {/* Exit confirmation - without logout option since we're not logged in */}
+            <ExitConfirmation showLogoutOption={false} />
+
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.flex}
