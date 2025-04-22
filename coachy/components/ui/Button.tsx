@@ -142,8 +142,8 @@ const Button = ({
                 {
                     backgroundColor: getBackgroundColor(),
                     borderRadius: theme.radii.md,
-                    borderWidth: variant === 'outline' ? 1 : 0,
-                    borderColor: variant === 'outline' ? getBorderColor() : undefined,
+                    borderWidth: 1, // Always add border width for consistent sizing
+                    borderColor: variant === 'outline' ? getBorderColor() : getBackgroundColor(), // Match background for non-outline variants
                     opacity: disabled ? 0.5 : 1,
                     width: fullWidth ? '100%' : undefined,
                     ...getPadding(),

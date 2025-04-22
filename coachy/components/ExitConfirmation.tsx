@@ -88,7 +88,7 @@ const ExitConfirmation: React.FC<ExitConfirmationProps> = ({
             {
                 text: "Logout",
                 onPress: handleLogout,
-                intent: "destructive" as const,
+                intent: "primary" as const,
             },
         ]
         : [
@@ -101,7 +101,7 @@ const ExitConfirmation: React.FC<ExitConfirmationProps> = ({
             {
                 text: "Exit",
                 onPress: handleExit,
-                intent: "destructive" as const,
+                intent: "primary" as const,
             },
         ];
 

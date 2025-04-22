@@ -21,9 +21,9 @@ export const dark: Theme = {
             hover: '#be123c',
         },
         secondary: {
-            DEFAULT: '#3f3f46', // Dark gray for secondary actions
+            DEFAULT: '#6d7a8c', // Updated to a lighter gray with better contrast
             foreground: '#ffffff',
-            hover: '#303034',
+            hover: '#566072',
         },
         tertiary: {
             DEFAULT: '#0d9488', // Teal
