@@ -7,15 +7,30 @@ export default function SettingsLayout() {
                 name="index"
                 options={{
                     title: "Settings",
-                    // The header is already managed by the root layout
                     headerShown: false
                 }}
             />
-            {/* Add other settings-related screens here if needed */}
-            {/* For example:
-      <Stack.Screen name="privacy" options={{ title: "Privacy Settings" }} />
-      <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
-      */}
+            <Stack.Screen
+                name="privacy-policy"
+                options={{
+                    title: "Privacy Policy",
+                    headerShown: false
+                }}
+            />
+            <Stack.Screen
+                name="terms-of-service"
+                options={{
+                    title: "Terms of Service",
+                    headerShown: false
+                }}
+            />
+            <Stack.Screen
+                name="data-privacy"
+                options={{
+                    title: "Data & Privacy",
+                    headerShown: false
+                }}
+            />
         </Stack>
     );
 }

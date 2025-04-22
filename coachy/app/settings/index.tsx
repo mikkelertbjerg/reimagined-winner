@@ -1,8 +1,10 @@
+// Save to: coachy/app/settings/index.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettings } from '@/context/SettingsContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 type SettingItemProps = {
     title: string;
@@ -64,6 +66,7 @@ const SettingsSection = ({ title, children }: { title: string, children: React.R
 
 const SettingsScreen = () => {
     const { theme, isDark, toggleTheme, isMetric, toggleMeasurementSystem } = useSettings();
+    const router = useRouter();
 
     return (
         <SafeAreaView
@@ -159,19 +162,19 @@ const SettingsScreen = () => {
                     <SettingItem
                         title="Privacy Policy"
                         icon="shield-outline"
-                        onPress={() => {/* Open privacy policy */ }}
+                        onPress={() => router.push('/settings/privacy-policy')}
                     />
 
                     <SettingItem
                         title="Terms of Service"
                         icon="document-text-outline"
-                        onPress={() => {/* Open terms of service */ }}
+                        onPress={() => router.push('/settings/terms-of-service')}
                     />
 
                     <SettingItem
                         title="Data & Privacy"
                         icon="lock-closed-outline"
-                        onPress={() => {/* Open data privacy settings */ }}
+                        onPress={() => router.push('/settings/data-privacy')}
                     />
                 </SettingsSection>
 
