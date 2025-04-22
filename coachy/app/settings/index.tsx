@@ -1,10 +1,11 @@
 // Save to: coachy/app/settings/index.tsx
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettings } from '@/context/SettingsContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import SegmentedSwitch from '@/components/ui/SegmentedSwitch';
 
 type SettingItemProps = {
     title: string;
@@ -85,36 +86,13 @@ const SettingsScreen = () => {
                         title="Theme"
                         icon="contrast-outline"
                         value={
-                            <View style={styles.themeToggleContainer}>
-                                <Text style={[
-                                    styles.themeToggleLabel,
-                                    {
-                                        color: !isDark ? theme.colors.primary.DEFAULT : theme.colors.text.muted,
-                                        fontWeight: !isDark ? '600' : 'normal'
-                                    }
-                                ]}>
-                                    Light
-                                </Text>
-                                <Switch
-                                    value={isDark}
-                                    onValueChange={toggleTheme}
-                                    trackColor={{
-                                        false: theme.colors.border.DEFAULT,
-                                        true: theme.colors.primary.DEFAULT
-                                    }}
-                                    thumbColor="#FFFFFF"
-                                    style={{ marginHorizontal: 8 }}
-                                />
-                                <Text style={[
-                                    styles.themeToggleLabel,
-                                    {
-                                        color: isDark ? theme.colors.primary.DEFAULT : theme.colors.text.muted,
-                                        fontWeight: isDark ? '600' : 'normal'
-                                    }
-                                ]}>
-                                    Dark
-                                </Text>
-                            </View>
+                            <SegmentedSwitch
+                                leftOption="Light"
+                                rightOption="Dark"
+                                value={isDark}
+                                onChange={toggleTheme}
+                                width={140}
+                            />
                         }
                     />
                 </SettingsSection>
@@ -124,36 +102,13 @@ const SettingsScreen = () => {
                         title="Units"
                         icon="speedometer-outline"
                         value={
-                            <View style={styles.themeToggleContainer}>
-                                <Text style={[
-                                    styles.themeToggleLabel,
-                                    {
-                                        color: !isMetric ? theme.colors.primary.DEFAULT : theme.colors.text.muted,
-                                        fontWeight: !isMetric ? '600' : 'normal'
-                                    }
-                                ]}>
-                                    Imperial
-                                </Text>
-                                <Switch
-                                    value={isMetric}
-                                    onValueChange={toggleMeasurementSystem}
-                                    trackColor={{
-                                        false: theme.colors.border.DEFAULT,
-                                        true: theme.colors.primary.DEFAULT
-                                    }}
-                                    thumbColor="#FFFFFF"
-                                    style={{ marginHorizontal: 8 }}
-                                />
-                                <Text style={[
-                                    styles.themeToggleLabel,
-                                    {
-                                        color: isMetric ? theme.colors.primary.DEFAULT : theme.colors.text.muted,
-                                        fontWeight: isMetric ? '600' : 'normal'
-                                    }
-                                ]}>
-                                    Metric
-                                </Text>
-                            </View>
+                            <SegmentedSwitch
+                                leftOption="Imperial"
+                                rightOption="Metric"
+                                value={isMetric}
+                                onChange={toggleMeasurementSystem}
+                                width={140}
+                            />
                         }
                     />
                 </SettingsSection>
@@ -241,13 +196,6 @@ const styles = StyleSheet.create({
     settingItemRight: {
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    themeToggleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    themeToggleLabel: {
-        fontSize: 14,
     },
     chevron: {
         marginLeft: 8,
