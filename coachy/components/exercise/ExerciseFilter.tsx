@@ -1,10 +1,11 @@
-// Save to: coachy/components/exercises/ExerciseFilters.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '@/context/SettingsContext';
-import { MuscleGroup, ExerciseFilters as FilterTypes } from '@/types/exercise';
+import { ExerciseFilters } from '@/types/exercise-filters';
+import { MuscleGroup, BodyPart, ExerciseFilters as FilterTypes, muscleToBodyPartMap, ExerciseSource } from '@/types/exercise';
 
+// Updated interface to support arrays of muscle groups and exercise sources
 interface ExerciseFilterProps {
     initialFilters: FilterTypes;
     onApplyFilters: (filters: FilterTypes) => void;
@@ -18,46 +19,127 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
 }) => {
     const { theme } = useSettings();
 
-    // Local state for filters (apply on save)
-    const [localFilters, setLocalFilters] = useState<FilterTypes>({ ...initialFilters });
+    // Updated to store arrays of muscle groups and exercise sources
+    const [localFilters, setLocalFilters] = useState<FilterTypes>({
+        muscleGroups: initialFilters.muscleGroups || [],
+        bodyParts: initialFilters.bodyParts || [],
+        sources: initialFilters.sources || [],
+        customOnly: initialFilters.customOnly || false,
+    });
 
     // Toggle muscle group filter
     const toggleMuscleGroup = (muscle: MuscleGroup) => {
-        setLocalFilters(current => ({
-            ...current,
-            muscleGroup: current.muscleGroup === muscle ? undefined : muscle
-        }));
+        setLocalFilters(current => {
+            const currentMuscleGroups = current.muscleGroups || [];
+
+            // If already selected, remove it
+            if (currentMuscleGroups.includes(muscle)) {
+                return {
+                    ...current,
+                    muscleGroups: currentMuscleGroups.filter(m => m !== muscle)
+                };
+            }
+            // Otherwise add it
+            else {
+                return {
+                    ...current,
+                    muscleGroups: [...currentMuscleGroups, muscle]
+                };
+            }
+        });
     };
 
-    // Toggle custom only filter
-    const toggleCustomOnly = () => {
-        setLocalFilters(current => ({
-            ...current,
-            customOnly: !current.customOnly
-        }));
+    // Toggle body part filter
+    const toggleBodyPart = (bodyPart: BodyPart) => {
+        setLocalFilters(current => {
+            const currentBodyParts = current.bodyParts || [];
+
+            // If already selected, remove it
+            if (currentBodyParts.includes(bodyPart)) {
+                return {
+                    ...current,
+                    bodyParts: currentBodyParts.filter(bp => bp !== bodyPart)
+                };
+            }
+            // Otherwise add it
+            else {
+                return {
+                    ...current,
+                    bodyParts: [...currentBodyParts, bodyPart]
+                };
+            }
+        });
     };
 
-    // Search query change
-    const handleSearchChange = (text: string) => {
-        setLocalFilters(current => ({
-            ...current,
-            searchQuery: text.length > 0 ? text : undefined
-        }));
+    // Toggle exercise source filter
+    const toggleExerciseSource = (source: ExerciseSource) => {
+        setLocalFilters(current => {
+            const currentSources = current.sources || [];
+
+            // If already selected, remove it
+            if (currentSources.includes(source)) {
+                return {
+                    ...current,
+                    sources: currentSources.filter(s => s !== source)
+                };
+            }
+            // Otherwise add it
+            else {
+                return {
+                    ...current,
+                    sources: [...currentSources, source]
+                };
+            }
+        });
     };
 
     // Apply filters
     const applyFilters = () => {
-        onApplyFilters(localFilters);
+        // Ensure we don't pass empty arrays
+        const filtersToApply = { ...localFilters };
+        if (filtersToApply.muscleGroups?.length === 0) {
+            delete filtersToApply.muscleGroups;
+        }
+        if (filtersToApply.bodyParts?.length === 0) {
+            delete filtersToApply.bodyParts;
+        }
+        if (filtersToApply.sources?.length === 0) {
+            delete filtersToApply.sources;
+        }
+
+        // Don't include searchQuery in filter
+        delete filtersToApply.searchQuery;
+
+        // Remove customOnly if we're using sources
+        if (filtersToApply.sources) {
+            delete filtersToApply.customOnly;
+        }
+
+        onApplyFilters(filtersToApply);
         onClose?.();
     };
 
     // Reset filters
     const resetFilters = () => {
-        const resetFiltersObj: FilterTypes = {};
-        setLocalFilters(resetFiltersObj);
-        onApplyFilters(resetFiltersObj);
-        onClose?.();
+        // Don't preserve search query when resetting
+        setLocalFilters({});
     };
+
+    // Available exercise sources
+    const exerciseSources = [
+        {
+            id: ExerciseSource.Predefined,
+            label: 'Predefined'
+        },
+        {
+            id: ExerciseSource.User,
+            label: 'User'
+        },
+        {
+            id: ExerciseSource.Community,
+            label: 'Community'
+        }
+    ];
 
     // Group muscle groups by body part
     const muscleGroups = {
@@ -79,10 +161,27 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
             MuscleGroup.Hamstrings,
             MuscleGroup.Glutes,
             MuscleGroup.Calves
-        ],
-        full: [
-            MuscleGroup.FullBody
         ]
+    };
+
+    // Body parts for high-level selection
+    const bodyParts = [
+        BodyPart.Arms,
+        BodyPart.Chest,
+        BodyPart.Back,
+        BodyPart.Shoulders,
+        BodyPart.Core,
+        BodyPart.Legs
+    ];
+
+    // Get the count of selected filters for the button
+    const getSelectedCount = () => {
+        let count = 0;
+        if (localFilters.muscleGroups) count += localFilters.muscleGroups.length;
+        if (localFilters.bodyParts) count += localFilters.bodyParts.length;
+        if (localFilters.sources) count += localFilters.sources.length;
+        if (localFilters.customOnly) count++;
+        return count;
     };
 
     return (
@@ -99,76 +198,90 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Search input */}
-                <View style={[
-                    styles.searchContainer,
-                    {
-                        backgroundColor: theme.colors.background.card,
-                        borderColor: theme.colors.border.DEFAULT
-                    }
-                ]}>
-                    <Ionicons name="search-outline" size={20} color={theme.colors.text.muted} />
-                    <TextInput
-                        style={[styles.searchInput, { color: theme.colors.text.DEFAULT }]}
-                        placeholder="Search exercises..."
-                        placeholderTextColor={theme.colors.text.muted}
-                        value={localFilters.searchQuery || ''}
-                        onChangeText={handleSearchChange}
-                    />
-                    {localFilters.searchQuery && (
-                        <TouchableOpacity
-                            onPress={() => handleSearchChange('')}
-                            hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                        >
-                            <Ionicons name="close-circle" size={18} color={theme.colors.text.muted} />
-                        </TouchableOpacity>
-                    )}
+                {/* Exercise Types */}
+                <View style={styles.sectionContainer}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={[styles.sectionTitle, { color: theme.colors.text.DEFAULT }]}>
+                            Exercise Sources
+                        </Text>
+                    </View>
+
+                    <View style={styles.muscleButtonsContainer}>
+                        {exerciseSources.map(source => (
+                            <TouchableOpacity
+                                key={source.id}
+                                style={[
+                                    styles.muscleButton,
+                                    {
+                                        backgroundColor: localFilters.sources?.includes(source.id)
+                                            ? theme.colors.primary.DEFAULT
+                                            : theme.colors.background.card,
+                                        borderColor: theme.colors.border.DEFAULT
+                                    }
+                                ]}
+                                onPress={() => toggleExerciseSource(source.id)}
+                            >
+                                <Text style={[
+                                    styles.muscleButtonText,
+                                    {
+                                        color: localFilters.sources?.includes(source.id)
+                                            ? theme.colors.tertiary.foreground
+                                            : theme.colors.text.DEFAULT
+                                    }
+                                ]}>
+                                    {source.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
                 </View>
 
-                {/* Custom exercises toggle */}
+                {/* Body Parts Section */}
                 <View style={styles.sectionContainer}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.text.DEFAULT }]}>
-                        Exercise Type
-                    </Text>
-
-                    <TouchableOpacity
-                        style={[
-                            styles.customToggle,
-                            {
-                                backgroundColor: localFilters.customOnly
-                                    ? theme.colors.primary.DEFAULT
-                                    : theme.colors.background.card,
-                                borderColor: theme.colors.border.DEFAULT
-                            }
-                        ]}
-                        onPress={toggleCustomOnly}
-                    >
-                        <Ionicons
-                            name={localFilters.customOnly ? "checkmark-circle" : "ellipse-outline"}
-                            size={20}
-                            color={localFilters.customOnly
-                                ? theme.colors.primary.foreground
-                                : theme.colors.text.muted
-                            }
-                        />
-                        <Text style={[
-                            styles.customToggleText,
-                            {
-                                color: localFilters.customOnly
-                                    ? theme.colors.primary.foreground
-                                    : theme.colors.text.DEFAULT
-                            }
-                        ]}>
-                            Show only my custom exercises
+                    <View style={styles.sectionHeader}>
+                        <Text style={[styles.sectionTitle, { color: theme.colors.text.DEFAULT }]}>
+                            Body Parts
                         </Text>
-                    </TouchableOpacity>
+                    </View>
+
+                    {/* Body part selection */}
+                    <View style={styles.muscleButtonsContainer}>
+                        {bodyParts.map(bodyPart => (
+                            <TouchableOpacity
+                                key={bodyPart}
+                                style={[
+                                    styles.muscleButton,
+                                    {
+                                        backgroundColor: localFilters.bodyParts?.includes(bodyPart)
+                                            ? theme.colors.primary.DEFAULT
+                                            : theme.colors.background.card,
+                                        borderColor: theme.colors.border.DEFAULT
+                                    }
+                                ]}
+                                onPress={() => toggleBodyPart(bodyPart)}
+                            >
+                                <Text style={[
+                                    styles.muscleButtonText,
+                                    {
+                                        color: localFilters.bodyParts?.includes(bodyPart)
+                                            ? theme.colors.secondary.foreground
+                                            : theme.colors.text.DEFAULT
+                                    }
+                                ]}>
+                                    {bodyPart}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
                 </View>
 
                 {/* Muscle groups */}
                 <View style={styles.sectionContainer}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.text.DEFAULT }]}>
-                        Muscle Groups
-                    </Text>
+                    <View style={styles.sectionHeader}>
+                        <Text style={[styles.sectionTitle, { color: theme.colors.text.DEFAULT }]}>
+                            Muscle Groups
+                        </Text>
+                    </View>
 
                     <Text style={[styles.groupTitle, { color: theme.colors.text.muted }]}>
                         Upper Body
@@ -180,7 +293,7 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
                                 style={[
                                     styles.muscleButton,
                                     {
-                                        backgroundColor: localFilters.muscleGroup === muscle
+                                        backgroundColor: localFilters.muscleGroups?.includes(muscle)
                                             ? theme.colors.primary.DEFAULT
                                             : theme.colors.background.card,
                                         borderColor: theme.colors.border.DEFAULT
@@ -191,7 +304,7 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
                                 <Text style={[
                                     styles.muscleButtonText,
                                     {
-                                        color: localFilters.muscleGroup === muscle
+                                        color: localFilters.muscleGroups?.includes(muscle)
                                             ? theme.colors.primary.foreground
                                             : theme.colors.text.DEFAULT
                                     }
@@ -212,7 +325,7 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
                                 style={[
                                     styles.muscleButton,
                                     {
-                                        backgroundColor: localFilters.muscleGroup === muscle
+                                        backgroundColor: localFilters.muscleGroups?.includes(muscle)
                                             ? theme.colors.primary.DEFAULT
                                             : theme.colors.background.card,
                                         borderColor: theme.colors.border.DEFAULT
@@ -223,7 +336,7 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
                                 <Text style={[
                                     styles.muscleButtonText,
                                     {
-                                        color: localFilters.muscleGroup === muscle
+                                        color: localFilters.muscleGroups?.includes(muscle)
                                             ? theme.colors.primary.foreground
                                             : theme.colors.text.DEFAULT
                                     }
@@ -244,7 +357,7 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
                                 style={[
                                     styles.muscleButton,
                                     {
-                                        backgroundColor: localFilters.muscleGroup === muscle
+                                        backgroundColor: localFilters.muscleGroups?.includes(muscle)
                                             ? theme.colors.primary.DEFAULT
                                             : theme.colors.background.card,
                                         borderColor: theme.colors.border.DEFAULT
@@ -255,39 +368,7 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
                                 <Text style={[
                                     styles.muscleButtonText,
                                     {
-                                        color: localFilters.muscleGroup === muscle
-                                            ? theme.colors.primary.foreground
-                                            : theme.colors.text.DEFAULT
-                                    }
-                                ]}>
-                                    {muscle}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
-                    <Text style={[styles.groupTitle, { color: theme.colors.text.muted }]}>
-                        Full Body
-                    </Text>
-                    <View style={styles.muscleButtonsContainer}>
-                        {muscleGroups.full.map(muscle => (
-                            <TouchableOpacity
-                                key={muscle}
-                                style={[
-                                    styles.muscleButton,
-                                    {
-                                        backgroundColor: localFilters.muscleGroup === muscle
-                                            ? theme.colors.primary.DEFAULT
-                                            : theme.colors.background.card,
-                                        borderColor: theme.colors.border.DEFAULT
-                                    }
-                                ]}
-                                onPress={() => toggleMuscleGroup(muscle)}
-                            >
-                                <Text style={[
-                                    styles.muscleButtonText,
-                                    {
-                                        color: localFilters.muscleGroup === muscle
+                                        color: localFilters.muscleGroups?.includes(muscle)
                                             ? theme.colors.primary.foreground
                                             : theme.colors.text.DEFAULT
                                     }
@@ -327,7 +408,10 @@ const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
                         styles.applyButtonText,
                         { color: theme.colors.primary.foreground }
                     ]}>
-                        Apply Filters
+                        {getSelectedCount() > 0
+                            ? `Apply ${getSelectedCount()} ${getSelectedCount() === 1 ? 'Filter' : 'Filters'}`
+                            : 'Apply Filters'
+                        }
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -357,28 +441,22 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
     },
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        marginBottom: 20,
-        height: 46,
-    },
-    searchInput: {
-        flex: 1,
-        height: '100%',
-        marginLeft: 8,
-        fontSize: 16,
-    },
     sectionContainer: {
         marginBottom: 24,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: '600',
-        marginBottom: 12,
+    },
+    selectionHelp: {
+        fontSize: 12,
+        marginLeft: 8,
+        fontStyle: 'italic',
     },
     customToggle: {
         flexDirection: 'row',

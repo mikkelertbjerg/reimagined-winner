@@ -1,4 +1,3 @@
-// Save to: coachy/app/(tabs)/exercises/[exercise].tsx
 import React, { useState, useEffect } from 'react';
 import {
     View,

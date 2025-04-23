@@ -12,13 +12,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettings } from '@/context/SettingsContext';
-import { Exercise, ExerciseFilters } from '@/types/exercise';
+import { Exercise } from '@/types/exercise';
 import { ExerciseService } from '@/services/ExerciseService';
 import { Ionicons } from '@expo/vector-icons';
 import FloatingActionButton from '@/components/ui/FloatingActionButton';
 import SearchBar from '@/components/ui/SearchBar';
 import ExerciseCard from '@/components/exercise/ExerciseCard';
 import ExerciseFilter from '@/components/exercise/ExerciseFilter';
+import { ExerciseFilters } from '@/types/exercise-filters';
 
 const ExercisesScreen = () => {
     const { theme } = useSettings();
@@ -73,13 +74,13 @@ const ExercisesScreen = () => {
     const applyFilters = () => {
         let result = [...exercises];
 
-        // Apply search query
+        // Apply search query (from the search bar)
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             result = result.filter(exercise =>
                 exercise.name.toLowerCase().includes(query) ||
                 exercise.description?.toLowerCase().includes(query) ||
-                exercise.primaryMuscles.some(muscle =>
+                exercise.primaryMuscles?.some(muscle =>
                     muscle.toLowerCase().includes(query)
                 ) ||
                 exercise.secondaryMuscles?.some(muscle =>
@@ -88,17 +89,38 @@ const ExercisesScreen = () => {
             );
         }
 
-        // Apply muscle group filter
-        if (filters.muscleGroup) {
-            result = result.filter(exercise =>
-                exercise.primaryMuscles.includes(filters.muscleGroup!) ||
-                exercise.secondaryMuscles?.includes(filters.muscleGroup!)
-            );
+        // Apply muscle groups filter (now supports multiple selections)
+        if (filters.muscleGroups && filters.muscleGroups.length > 0) {
+            result = result.filter(exercise => {
+                // Get all muscles for this exercise
+                const allMuscles = [
+                    ...exercise.primaryMuscles,
+                    ...(exercise.secondaryMuscles || [])
+                ];
+
+                // Check if any of the selected muscle groups are in this exercise
+                return filters.muscleGroups!.some(muscleGroup =>
+                    allMuscles.includes(muscleGroup)
+                );
+            });
         }
 
-        // Apply custom only filter
-        if (filters.customOnly) {
-            result = result.filter(exercise => exercise.isCustom);
+        // Apply body parts filter (supports multiple selections)
+        if (filters.bodyParts && filters.bodyParts.length > 0) {
+            result = result.filter(exercise => {
+                // Check if any of the selected body parts are in this exercise
+                return filters.bodyParts!.some(bodyPart =>
+                    exercise.bodyParts.includes(bodyPart)
+                );
+            });
+        }
+
+        // Apply exercise sources filter (supports multiple selections)
+        if (filters.sources && filters.sources.length > 0) {
+            result = result.filter(exercise => {
+                // If source is defined on the exercise, filter by it
+                return filters.sources!.includes(exercise.source);
+            });
         }
 
         setFilteredExercises(result);
@@ -120,9 +142,15 @@ const ExercisesScreen = () => {
         Alert.alert("Coming Soon", "Creating new exercises will be available soon!");
     };
 
+
     // Check if any filters are active
     const hasActiveFilters = () => {
-        return Object.keys(filters).length > 0;
+        return (
+            (filters.muscleGroups && filters.muscleGroups.length > 0) ||
+            (filters.bodyParts && filters.bodyParts.length > 0) ||
+            (filters.sources && filters.sources.length > 0) ||
+            filters.customOnly
+        );
     };
 
     // Render loading state

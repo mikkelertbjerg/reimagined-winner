@@ -1,4 +1,4 @@
-// Save to: coachy/types/exercise.ts
+// types/exercise.ts
 
 // Define body part categories
 export enum BodyPart {
@@ -36,6 +36,13 @@ export enum MuscleGroup {
     FullBody = "Full Body",
 }
 
+// Define exercise source types
+export enum ExerciseSource {
+    Predefined = "predefined",  // Built-in exercises provided by the app
+    User = "user",              // User-created exercises
+    Community = "community"     // Exercises shared by other users
+}
+
 // Mapping muscle groups to body parts
 export const muscleToBodyPartMap: Record<MuscleGroup, BodyPart> = {
     [MuscleGroup.Chest]: BodyPart.Chest,
@@ -62,7 +69,7 @@ export interface Exercise {
     primaryMuscles: MuscleGroup[];
     secondaryMuscles?: MuscleGroup[];
     bodyParts: BodyPart[]; // New field to store body parts
-    isCustom?: boolean;
+    source: ExerciseSource; // Added source field
     createdBy?: string; // User ID for custom exercises
     variationOf?: string; // ID of the parent exercise if this is a variation
 }
@@ -73,10 +80,11 @@ export interface ExerciseDetails extends Exercise {
     similarExercises?: Exercise[];
 }
 
-// Type for exercise filters
+// Updated filter type for multiple muscle groups and sources
 export interface ExerciseFilters {
-    muscleGroup?: MuscleGroup;
-    bodyPart?: BodyPart; // New filter by body part
+    muscleGroups?: MuscleGroup[];   // Multiple muscle groups
+    bodyParts?: BodyPart[];         // Multiple body parts
+    sources?: ExerciseSource[];     // Multiple exercise sources
     searchQuery?: string;
-    customOnly?: boolean;
+    customOnly?: boolean;           // Legacy field, can be replaced by sources
 }

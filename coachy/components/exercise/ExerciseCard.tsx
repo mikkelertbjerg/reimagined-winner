@@ -1,9 +1,9 @@
-// components/exercise/SimpleExerciseCard.tsx
+// components/exercise/ExerciseCard.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSettings } from '@/context/SettingsContext';
-import { Exercise } from '@/types/exercise';
+import { Exercise, MuscleGroup } from '@/types/exercise';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ExerciseCardProps {
@@ -17,6 +17,19 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
     const handlePress = () => {
         router.push(`/exercises/${exercise.id}`);
     };
+
+    // Combine primary and secondary muscles, limited to 3 total
+    const primaryMuscles = exercise.primaryMuscles || [];
+    const secondaryMuscles = exercise.secondaryMuscles || [];
+
+    // Determine which muscles to display with priority to primary muscles
+    const displayMuscles: { muscle: MuscleGroup; isPrimary: boolean }[] = [
+        ...primaryMuscles.map(muscle => ({ muscle, isPrimary: true })),
+        ...secondaryMuscles.map(muscle => ({ muscle, isPrimary: false }))
+    ].slice(0, 3);
+
+    // Calculate if we're hiding muscles due to the limit
+    const hiddenCount = (primaryMuscles.length + secondaryMuscles.length) - displayMuscles.length;
 
     return (
         <TouchableOpacity
@@ -36,32 +49,56 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                     <Text style={[styles.name, { color: theme.colors.text.DEFAULT }]} numberOfLines={1}>
                         {exercise.name}
                     </Text>
-
-                    {exercise.isCustom && (
-                        <Text style={[styles.customBadge, { color: theme.colors.primary.DEFAULT }]}>
-                            (Custom)
-                        </Text>
-                    )}
                 </View>
 
-                {/* Muscle groups */}
+                {/* Muscle groups - limited to 3 tags */}
                 <View style={styles.muscleGroups}>
-                    {exercise.primaryMuscles.map((muscle, index) => (
+                    {displayMuscles.map((item, index) => (
                         <View
                             key={index}
                             style={[
                                 styles.muscleBadge,
-                                { backgroundColor: theme.colors.primary.DEFAULT }
+                                item.isPrimary
+                                    ? { backgroundColor: theme.colors.primary.DEFAULT }
+                                    : {
+                                        backgroundColor: 'transparent',
+                                        borderWidth: 1,
+                                        borderColor: theme.colors.primary.DEFAULT
+                                    }
                             ]}
                         >
-                            <Text style={[
-                                styles.muscleBadgeText,
-                                { color: theme.colors.primary.foreground }
-                            ]}>
-                                {muscle}
+                            <Text
+                                style={[
+                                    styles.muscleBadgeText,
+                                    {
+                                        color: item.isPrimary
+                                            ? theme.colors.primary.foreground
+                                            : theme.colors.primary.DEFAULT
+                                    }
+                                ]}
+                            >
+                                {item.muscle}
                             </Text>
                         </View>
                     ))}
+
+                    {/* Display "+X more" badge if we have hidden muscles */}
+                    {hiddenCount > 0 && (
+                        <View
+                            style={[
+                                styles.muscleBadge,
+                                {
+                                    backgroundColor: theme.colors.background.DEFAULT,
+                                    borderColor: theme.colors.border.strong,
+                                    borderWidth: 1
+                                }
+                            ]}
+                        >
+                            <Text style={[styles.muscleBadgeText, { color: theme.colors.text.muted }]}>
+                                +{hiddenCount} more
+                            </Text>
+                        </View>
+                    )}
                 </View>
             </View>
 

@@ -1,5 +1,5 @@
 // Save to: coachy/services/ExerciseService.ts
-import { Exercise, MuscleGroup, BodyPart, muscleToBodyPartMap } from '@/types/exercise';
+import { Exercise, MuscleGroup, BodyPart, muscleToBodyPartMap, ExerciseSource } from '@/types/exercise';
 
 // Helper function to calculate body parts from muscle groups
 const calculateBodyParts = (muscles: MuscleGroup[]): BodyPart[] => {
@@ -22,6 +22,7 @@ const MOCK_EXERCISES: Exercise[] = [
         primaryMuscles: [MuscleGroup.Chest],
         secondaryMuscles: [MuscleGroup.Shoulders, MuscleGroup.Triceps],
         bodyParts: [BodyPart.Chest, BodyPart.Shoulders, BodyPart.Arms],
+        source: ExerciseSource.Predefined,
     },
     {
         id: '2',
@@ -30,6 +31,7 @@ const MOCK_EXERCISES: Exercise[] = [
         primaryMuscles: [MuscleGroup.Quadriceps],
         secondaryMuscles: [MuscleGroup.Hamstrings, MuscleGroup.Glutes],
         bodyParts: [BodyPart.Legs],
+        source: ExerciseSource.Predefined,
     },
     {
         id: '3',
@@ -38,6 +40,7 @@ const MOCK_EXERCISES: Exercise[] = [
         primaryMuscles: [MuscleGroup.LowerBack],
         secondaryMuscles: [MuscleGroup.Hamstrings, MuscleGroup.Glutes],
         bodyParts: [BodyPart.Core, BodyPart.Legs],
+        source: ExerciseSource.Predefined,
     },
     {
         id: '4',
@@ -46,6 +49,7 @@ const MOCK_EXERCISES: Exercise[] = [
         primaryMuscles: [MuscleGroup.Back],
         secondaryMuscles: [MuscleGroup.Biceps, MuscleGroup.Shoulders],
         bodyParts: [BodyPart.Back, BodyPart.Arms, BodyPart.Shoulders],
+        source: ExerciseSource.Predefined,
     },
     {
         id: '5',
@@ -54,6 +58,7 @@ const MOCK_EXERCISES: Exercise[] = [
         primaryMuscles: [MuscleGroup.Shoulders],
         secondaryMuscles: [MuscleGroup.Triceps],
         bodyParts: [BodyPart.Shoulders, BodyPart.Arms],
+        source: ExerciseSource.Predefined,
     },
     {
         id: '6',
@@ -62,6 +67,7 @@ const MOCK_EXERCISES: Exercise[] = [
         primaryMuscles: [MuscleGroup.Biceps],
         secondaryMuscles: [MuscleGroup.Forearms],
         bodyParts: [BodyPart.Arms],
+        source: ExerciseSource.Predefined,
     },
     {
         id: '7',
@@ -69,6 +75,7 @@ const MOCK_EXERCISES: Exercise[] = [
         description: 'An isolation exercise that primarily targets the triceps muscles.',
         primaryMuscles: [MuscleGroup.Triceps],
         bodyParts: [BodyPart.Arms],
+        source: ExerciseSource.Predefined,
     },
     {
         id: '8',
@@ -78,6 +85,7 @@ const MOCK_EXERCISES: Exercise[] = [
         secondaryMuscles: [MuscleGroup.Hamstrings, MuscleGroup.Glutes],
         bodyParts: [BodyPart.Legs],
         variationOf: '2', // Variation of Squat
+        source: ExerciseSource.Predefined,
     },
     {
         id: '9',
@@ -87,6 +95,7 @@ const MOCK_EXERCISES: Exercise[] = [
         secondaryMuscles: [MuscleGroup.Shoulders, MuscleGroup.Triceps],
         bodyParts: [BodyPart.Chest, BodyPart.Shoulders, BodyPart.Arms],
         variationOf: '1', // Variation of Bench Press
+        source: ExerciseSource.Predefined,
     },
     {
         id: '10',
@@ -94,6 +103,7 @@ const MOCK_EXERCISES: Exercise[] = [
         description: 'An isolation exercise that primarily targets the abdominal muscles.',
         primaryMuscles: [MuscleGroup.Abs],
         bodyParts: [BodyPart.Core],
+        source: ExerciseSource.Predefined,
     },
 ];
 
