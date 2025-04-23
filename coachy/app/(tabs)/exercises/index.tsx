@@ -1,3 +1,4 @@
+// app/(tabs)/exercises/index.tsx
 import React, { useState, useEffect } from 'react';
 import {
     View,
@@ -6,27 +7,40 @@ import {
     FlatList,
     ActivityIndicator,
     RefreshControl,
-    TouchableOpacity,
-    Alert
+    Alert,
+    Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettings } from '@/context/SettingsContext';
-import { Exercise } from '@/types/exercise';
+import { Exercise, ExerciseFilters } from '@/types/exercise';
 import { ExerciseService } from '@/services/ExerciseService';
 import { Ionicons } from '@expo/vector-icons';
+import FloatingActionButton from '@/components/ui/FloatingActionButton';
+import SearchBar from '@/components/ui/SearchBar';
+import ExerciseCard from '@/components/exercise/ExerciseCard';
+import ExerciseFilter from '@/components/exercise/ExerciseFilter';
 
 const ExercisesScreen = () => {
     const { theme } = useSettings();
 
     // State
     const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filters, setFilters] = useState<ExerciseFilters>({});
+    const [showFilters, setShowFilters] = useState(false);
 
     // Load exercises on mount
     useEffect(() => {
         loadExercises();
     }, []);
+
+    // Filter exercises when search query or filters change
+    useEffect(() => {
+        applyFilters();
+    }, [exercises, searchQuery, filters]);
 
     // Load exercises from service
     const loadExercises = async () => {
@@ -34,6 +48,7 @@ const ExercisesScreen = () => {
             setLoading(true);
             const data = await ExerciseService.getExercises();
             setExercises(data);
+            setFilteredExercises(data);
         } catch (error) {
             console.error('Failed to load exercises:', error);
         } finally {
@@ -54,36 +69,60 @@ const ExercisesScreen = () => {
         }
     };
 
+    // Apply filters and search query
+    const applyFilters = () => {
+        let result = [...exercises];
+
+        // Apply search query
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(exercise =>
+                exercise.name.toLowerCase().includes(query) ||
+                exercise.description?.toLowerCase().includes(query) ||
+                exercise.primaryMuscles.some(muscle =>
+                    muscle.toLowerCase().includes(query)
+                ) ||
+                exercise.secondaryMuscles?.some(muscle =>
+                    muscle.toLowerCase().includes(query)
+                )
+            );
+        }
+
+        // Apply muscle group filter
+        if (filters.muscleGroup) {
+            result = result.filter(exercise =>
+                exercise.primaryMuscles.includes(filters.muscleGroup!) ||
+                exercise.secondaryMuscles?.includes(filters.muscleGroup!)
+            );
+        }
+
+        // Apply custom only filter
+        if (filters.customOnly) {
+            result = result.filter(exercise => exercise.isCustom);
+        }
+
+        setFilteredExercises(result);
+    };
+
+    // Handle search query change
+    const handleSearch = (text: string) => {
+        setSearchQuery(text);
+    };
+
+    // Handle filter application
+    const handleApplyFilters = (newFilters: ExerciseFilters) => {
+        setFilters(newFilters);
+        setShowFilters(false);
+    };
+
     // Handle FAB press for adding a new exercise
     const handleAddExercise = () => {
         Alert.alert("Coming Soon", "Creating new exercises will be available soon!");
     };
 
-    // Render exercise item
-    const renderExerciseItem = ({ item }: { item: Exercise }) => {
-        return (
-            <View style={[
-                styles.exerciseCard,
-                { backgroundColor: theme.colors.background.card, borderColor: theme.colors.border.DEFAULT }
-            ]}>
-                <Text style={[styles.exerciseName, { color: theme.colors.text.DEFAULT }]}>
-                    {item.name}
-                </Text>
-
-                <View style={styles.muscleGroups}>
-                    {item.primaryMuscles.map((muscle, index) => (
-                        <View key={index} style={[
-                            styles.muscleBadge,
-                            { backgroundColor: theme.colors.primary.DEFAULT }
-                        ]}>
-                            <Text style={[styles.muscleBadgeText, { color: theme.colors.primary.foreground }]}>
-                                {muscle}
-                            </Text>
-                        </View>
-                    ))}
-                </View>
-            </View>
-        );
+    // Check if any filters are active
+    const hasActiveFilters = () => {
+        return Object.keys(filters).length > 0;
     };
 
     // Render loading state
@@ -108,10 +147,24 @@ const ExercisesScreen = () => {
             styles.container,
             { backgroundColor: theme.colors.background.DEFAULT }
         ]}>
+            {/* Header with search bar */}
+            <View style={styles.header}>
+                <SearchBar
+                    placeholder="Search exercises..."
+                    value={searchQuery}
+                    onChangeText={handleSearch}
+                    showFilterIcon={true}
+                    filterBadge={hasActiveFilters()}
+                    onFilterPress={() => setShowFilters(true)}
+                    style={styles.searchBar}
+                />
+            </View>
+
+            {/* Exercise list */}
             <FlatList
-                data={exercises}
+                data={filteredExercises}
                 keyExtractor={item => item.id}
-                renderItem={renderExerciseItem}
+                renderItem={({ item }) => <ExerciseCard exercise={item} />}
                 contentContainerStyle={styles.listContent}
                 refreshControl={
                     <RefreshControl
@@ -124,23 +177,35 @@ const ExercisesScreen = () => {
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={[styles.emptyText, { color: theme.colors.text.muted }]}>
-                            No exercises found
+                            {searchQuery || hasActiveFilters()
+                                ? 'No exercises match your search or filters'
+                                : 'No exercises found'
+                            }
                         </Text>
                     </View>
                 }
             />
 
-            {/* Floating Action Button (FAB) */}
-            <TouchableOpacity
-                style={[
-                    styles.fab,
-                    { backgroundColor: theme.colors.primary.DEFAULT }
-                ]}
-                onPress={handleAddExercise}
-                activeOpacity={0.8}
+            {/* Filter modal */}
+            <Modal
+                visible={showFilters}
+                animationType="slide"
+                transparent={false}
+                onRequestClose={() => setShowFilters(false)}
             >
-                <Ionicons name="add" size={24} color={theme.colors.primary.foreground} />
-            </TouchableOpacity>
+                <ExerciseFilter
+                    initialFilters={filters}
+                    onApplyFilters={handleApplyFilters}
+                    onClose={() => setShowFilters(false)}
+                />
+            </Modal>
+
+            {/* FAB */}
+            <FloatingActionButton
+                icon={<Ionicons name="add" size={24} color={theme.colors.primary.foreground} />}
+                onPress={handleAddExercise}
+                accessibilityLabel="Add new exercise"
+            />
         </SafeAreaView>
     );
 };
@@ -148,6 +213,13 @@ const ExercisesScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    header: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+    },
+    searchBar: {
+        marginBottom: 8,
     },
     loadingContainer: {
         flex: 1,
@@ -160,32 +232,7 @@ const styles = StyleSheet.create({
     },
     listContent: {
         padding: 16,
-    },
-    exerciseCard: {
-        padding: 16,
-        borderRadius: 8,
-        marginBottom: 12,
-        borderWidth: 1,
-    },
-    exerciseName: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 8,
-    },
-    muscleGroups: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    muscleBadge: {
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
-        marginRight: 6,
-        marginBottom: 4,
-    },
-    muscleBadgeText: {
-        fontSize: 12,
-        fontWeight: '500',
+        paddingTop: 0,
     },
     emptyContainer: {
         padding: 24,
@@ -194,21 +241,7 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-    },
-    fab: {
-        position: 'absolute',
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        right: 20,
-        bottom: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        textAlign: 'center',
     }
 });
 

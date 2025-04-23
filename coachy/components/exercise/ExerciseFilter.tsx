@@ -5,13 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '@/context/SettingsContext';
 import { MuscleGroup, ExerciseFilters as FilterTypes } from '@/types/exercise';
 
-interface ExerciseFiltersProps {
+interface ExerciseFilterProps {
     initialFilters: FilterTypes;
     onApplyFilters: (filters: FilterTypes) => void;
     onClose?: () => void;
 }
 
-const ExerciseFilters: React.FC<ExerciseFiltersProps> = ({
+const ExerciseFilter: React.FC<ExerciseFilterProps> = ({
     initialFilters,
     onApplyFilters,
     onClose
@@ -441,4 +441,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ExerciseFilters;
+export default ExerciseFilter;
