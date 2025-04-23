@@ -48,7 +48,6 @@ export default function RootLayout() {
             <Stack
               screenOptions={{
                 header: (props) => {
-                  // Don't show header for auth screen
                   if (props.route.name === 'auth') {
                     return null;
                   }

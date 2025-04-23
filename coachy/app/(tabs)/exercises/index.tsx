@@ -5,12 +5,15 @@ import {
     StyleSheet,
     FlatList,
     ActivityIndicator,
-    RefreshControl
+    RefreshControl,
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettings } from '@/context/SettingsContext';
 import { Exercise } from '@/types/exercise';
 import { ExerciseService } from '@/services/ExerciseService';
+import { Ionicons } from '@expo/vector-icons';
 
 const ExercisesScreen = () => {
     const { theme } = useSettings();
@@ -49,6 +52,11 @@ const ExercisesScreen = () => {
         } finally {
             setRefreshing(false);
         }
+    };
+
+    // Handle FAB press for adding a new exercise
+    const handleAddExercise = () => {
+        Alert.alert("Coming Soon", "Creating new exercises will be available soon!");
     };
 
     // Render exercise item
@@ -121,6 +129,18 @@ const ExercisesScreen = () => {
                     </View>
                 }
             />
+
+            {/* Floating Action Button (FAB) */}
+            <TouchableOpacity
+                style={[
+                    styles.fab,
+                    { backgroundColor: theme.colors.primary.DEFAULT }
+                ]}
+                onPress={handleAddExercise}
+                activeOpacity={0.8}
+            >
+                <Ionicons name="add" size={24} color={theme.colors.primary.foreground} />
+            </TouchableOpacity>
         </SafeAreaView>
     );
 };
@@ -174,6 +194,21 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
+    },
+    fab: {
+        position: 'absolute',
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        right: 20,
+        bottom: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     }
 });
 
